@@ -1,0 +1,12 @@
+[Unit]
+Description=Plex status and control AppIndicator
+
+[Service]
+# This placeholder will be replaced by install.sh with the absolute path
+# to plex-appindicator.py. If doing manual install, replace it!
+ExecStart=__EXEC_START__
+Restart=on-failure
+RestartSec=10
+
+[Install]
+WantedBy=default.target
