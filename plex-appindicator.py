@@ -10,7 +10,9 @@ import os
 
 CHECK_INTERVAL_MS = 3000  # 3 seconds
 
-BASE_SVG = os.path.expanduser("~/.local/share/icons/plex/plex-base.svg")
+REPO_DIR = os.path.dirname(os.path.abspath(__file__))
+BASE_ICON_DIR = os.path.expanduser("~/.local/share/icons/plex")
+BASE_SVG = os.path.join(BASE_ICON_DIR, "plex-base.svg")
 ICON_DIR = os.path.expanduser("~/.local/share/icons/hicolor/scalable/status")
 
 COLOR_PLACEHOLDER = "#e5a00d"  # must match the color in the base SVG
@@ -91,6 +93,22 @@ class PlexWatcher:
         # Separator
         self.menu.append(Gtk.SeparatorMenuItem())
 
+        # Open folders
+        open_repo_item = Gtk.MenuItem(label="Open Code Repository")
+        open_repo_item.connect("activate", self.open_repo)
+        self.menu.append(open_repo_item)
+
+        open_base_icon_item = Gtk.MenuItem(label="Open Base Icon Folder")
+        open_base_icon_item.connect("activate", self.open_base_icon_folder)
+        self.menu.append(open_base_icon_item)
+
+        open_status_icons_item = Gtk.MenuItem(label="Open Status Icons Folder")
+        open_status_icons_item.connect("activate", self.open_status_icons_folder)
+        self.menu.append(open_status_icons_item)
+
+        # Separator
+        self.menu.append(Gtk.SeparatorMenuItem())
+
         # Quit
         quit_item = Gtk.MenuItem(label="Quit")
         quit_item.connect("activate", self.quit)
@@ -160,6 +178,21 @@ class PlexWatcher:
         # We'll get the updated status on the next timer tick,
         # but do one immediate refresh too.
         self.update_status()
+
+    # ----- open folder actions -----
+
+    def _open_folder(self, path: str):
+        """Open a folder in the default file manager."""
+        subprocess.Popen(["xdg-open", path], start_new_session=True)
+
+    def open_repo(self, _widget):
+        self._open_folder(REPO_DIR)
+
+    def open_base_icon_folder(self, _widget):
+        self._open_folder(BASE_ICON_DIR)
+
+    def open_status_icons_folder(self, _widget):
+        self._open_folder(ICON_DIR)
 
     # ----- UI update -----
 

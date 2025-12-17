@@ -39,6 +39,7 @@ sudo apt install python3 python3-gi gir1.2-gtk-3.0 gir1.2-ayatanaappindicator3-0
 - plex-appindicator.py
 - plex-base.svg (raw single-color SVG used for recoloring)
 - install.sh (quick installation script if preferred)
+- restart.sh (quick restart of indicator, useful when debugging changes)
 
 ## How the Icon System Works
 The script loads plex-base.svg.
