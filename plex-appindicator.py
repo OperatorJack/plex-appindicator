@@ -64,6 +64,7 @@ ICON_LOADING = ICON_DEFS["loading"]["name"]
 ICON_BAD = ICON_DEFS["stopped"]["name"]
 
 SERVICE_NAME = "plexmediaserver.service"
+PLEX_WEB_URL = "http://localhost:32400/web"
 
 
 class PlexWatcher:
@@ -89,6 +90,12 @@ class PlexWatcher:
         self.action_item = Gtk.MenuItem(label="Start/Stop Plex")
         self.action_item.connect("activate", self.toggle_plex)
         self.menu.append(self.action_item)
+
+        # Open Plex Web (only enabled when running)
+        self.open_web_item = Gtk.MenuItem(label="Open Plex Web")
+        self.open_web_item.connect("activate", self.open_plex_web)
+        self.open_web_item.set_sensitive(False)  # disabled until we know Plex is running
+        self.menu.append(self.open_web_item)
 
         # Separator
         self.menu.append(Gtk.SeparatorMenuItem())
@@ -179,20 +186,23 @@ class PlexWatcher:
         # but do one immediate refresh too.
         self.update_status()
 
-    # ----- open folder actions -----
+    # ----- open folder/URL actions -----
 
-    def _open_folder(self, path: str):
-        """Open a folder in the default file manager."""
+    def _xdg_open(self, path: str):
+        """Open a path or URL with xdg-open."""
         subprocess.Popen(["xdg-open", path], start_new_session=True)
 
+    def open_plex_web(self, _widget):
+        self._xdg_open(PLEX_WEB_URL)
+
     def open_repo(self, _widget):
-        self._open_folder(REPO_DIR)
+        self._xdg_open(REPO_DIR)
 
     def open_base_icon_folder(self, _widget):
-        self._open_folder(BASE_ICON_DIR)
+        self._xdg_open(BASE_ICON_DIR)
 
     def open_status_icons_folder(self, _widget):
-        self._open_folder(ICON_DIR)
+        self._xdg_open(ICON_DIR)
 
     # ----- UI update -----
 
@@ -211,13 +221,15 @@ class PlexWatcher:
             self.status_item.set_label("Plex: RUNNING")
             self.action_item.set_label("Stop Plex")
             self.action_item.set_sensitive(True)
+            self.open_web_item.set_sensitive(True)
 
         elif status in ("activating", "reloading", "unknown"):
             # Starting / reloading / unknown → treat as loading
             self.indicator.set_icon_full(ICON_LOADING, "Plex starting / checking")
             self.status_item.set_label(f"Plex: STARTING ({status})")
             self.action_item.set_sensitive(False)
-            self.action_item.set_label("Stop Plex")  
+            self.action_item.set_label("Stop Plex")
+            self.open_web_item.set_sensitive(False)
 
         else:
             # inactive, failed, deactivating, etc.
@@ -225,6 +237,7 @@ class PlexWatcher:
             self.status_item.set_label(f"Plex: {status.upper()}")
             self.action_item.set_label("Start Plex")
             self.action_item.set_sensitive(True)
+            self.open_web_item.set_sensitive(False)
 
         return True  # keep timer running
 
